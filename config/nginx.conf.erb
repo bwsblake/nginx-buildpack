@@ -35,11 +35,26 @@ http {
 		server_name _;
 		keepalive_timeout 5;
 
+		root wordpress;
+		index index.php index.html index.htm;
+
 		location / {
+			try_files $uri $uri/ /index.html;
+		}
+
+		location /portal {
 			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 			proxy_set_header Host $http_host;
 			proxy_redirect off;
 			proxy_pass http://app_server;
 		}
+
+		location ~ \.php$ {
+			fastcgi_split_path_info ^(.+\.php)(/.+)$;
+			fastcgi_pass 127.0.0.1:9000;
+			fastcgi_index index.php;
+			include fastcgi_params;
+		}
+
 	}
 }
